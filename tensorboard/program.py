@@ -392,5 +392,13 @@ class WerkzeugServer(serving.ThreadedWSGIServer, TensorBoardServer):
       host = self._flags.host
       display_host = (
           '[%s]' % host if ':' in host and not host.startswith('[') else host)
+
+    # Confirm that the connection is open, otherwise change to `localhost`
+    socket.setdefaulttimeout(1)
+    try:
+        socket.socket().connect((display_host, self.server_port))
+    except socket.timeout as e:
+        display_host = "localhost"
+
     return 'http://%s:%d%s' % (display_host, self.server_port,
                                self._flags.path_prefix)
